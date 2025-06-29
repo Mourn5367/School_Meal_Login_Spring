@@ -19,8 +19,13 @@ public class SecurityConfig {
 
                 // 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/register", "/menu", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/posts/*/view").permitAll()  // 게시글 읽기는 모든 사용자에게 허용
+                        // 정적 리소스와 로그인 관련 페이지는 모든 사용자에게 허용
+                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                        // 게시글 읽기는 모든 사용자에게 허용 (로그인 없이도 볼 수 있음)
+                        .requestMatchers("/posts/*/view", "/posts").permitAll()
+                        // 메뉴 페이지도 모든 사용자에게 허용
+                        .requestMatchers("/menu").permitAll()
+                        // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
 
@@ -28,16 +33,18 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/posts", true)
+                        .defaultSuccessUrl("/menu", true)
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
 
-                // 로그아웃 설정 - 최신 방식 사용
+                // 로그아웃 설정
                 .logout(logout -> logout
-                        .logoutUrl("/logout")  // AntPathRequestMatcher 대신 단순 문자열 사용
-                        .logoutSuccessUrl("/")
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
                         .addLogoutHandler(customLogoutHandler())
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
 
@@ -45,6 +52,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
+                        .sessionRegistry(sessionRegistry())
                 );
 
         return http.build();
@@ -54,13 +62,18 @@ public class SecurityConfig {
     public LogoutHandler customLogoutHandler() {
         return (request, response, authentication) -> {
             // 백엔드 API 로그아웃 호출을 위한 세션 ID 정리
-            String sessionId = (String) request.getSession().getAttribute("API_SESSION_ID");
+            String sessionId = (String) request.getSession().getAttribute("SESSION_ID");
             if (sessionId != null) {
                 // 여기서 백엔드 API 로그아웃 호출
                 // AuthService.logout(sessionId) 호출 가능
-                request.getSession().removeAttribute("API_SESSION_ID");
+                request.getSession().removeAttribute("SESSION_ID");
                 request.getSession().removeAttribute("CURRENT_USER");
             }
         };
+    }
+
+    @Bean
+    public org.springframework.security.core.session.SessionRegistry sessionRegistry() {
+        return new org.springframework.security.core.session.SessionRegistryImpl();
     }
 }

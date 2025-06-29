@@ -14,6 +14,13 @@ import java.util.List;
 public class MenuDto {
     private Long id;
     private String date;
+
+    // 개별 식사 타입
+    @JsonProperty("meal_type")
+    private String mealType; // "아침", "점심", "저녁"
+
+    private String content; // 해당 식사의 메뉴 내용
+
     private String breakfast;
     private String lunch;
     private String dinner;

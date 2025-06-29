@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class PostService {
 
     public List<PostDto> getAllPosts() {
         try {
-            // 최근 게시글 목록 조회 (백엔드 API 수정 필요할 수 있음)
+            // 최근 게시글 목록 조회
             return webClient.get()
                     .uri("/posts")
                     .retrieve()
@@ -75,7 +76,6 @@ public class PostService {
 
             if (response != null) {
                 // 응답 구조에 따라 데이터 추출
-                // Flutter API 응답: { post: PostDto, comments: List<CommentDto> }
                 PostDto post = convertToPostDto(response);
 
                 if (response.containsKey("comments")) {
