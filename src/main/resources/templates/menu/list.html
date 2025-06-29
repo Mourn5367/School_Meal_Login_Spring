@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학식 메뉴 앱 - 메뉴</title>
+
+  <!-- Material Design Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Flutter AppBar 스타일 */
+    .app-bar {
+      background-color: #2196f3;
+      color: white;
+      padding: 16px 24px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+    }
+
+    .app-bar h1 {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .app-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .logout-button {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .logout-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* 메인 컨테이너 */
+    .main-container {
+      flex: 1;
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Flutter Card 스타일 - ExpansionTile */
+    .menu-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .menu-card:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .menu-card-header {
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background-color 0.2s ease;
+    }
+
+    .menu-card-header:hover {
+      background-color: #f8f9fa;
+    }
+
+    .menu-card-header.expanded {
+      background-color: rgba(33, 150, 243, 0.1);
+    }
+
+    .menu-date-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .date-indicator {
+      width: 4px;
+      height: 40px;
+      border-radius: 2px;
+      background-color: #2196f3;
+    }
+
+    /* 요일별 색상 */
+    .date-indicator.monday { background-color: #f44336; }
+    .date-indicator.tuesday { background-color: #ff9800; }
+    .date-indicator.wednesday { background-color: #4caf50; }
+    .date-indicator.thursday { background-color: #2196f3; }
+    .date-indicator.friday { background-color: #9c27b0; }
+
+    .date-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .date-primary {
+      font-size: 18px;
+      font-weight: bold;
+      color: #212121;
+      margin-bottom: 4px;
+    }
+
+    .date-secondary {
+      font-size: 14px;
+      color: #757575;
+    }
+
+    .expand-icon {
+      transition: transform 0.3s ease;
+      color: #757575;
+    }
+
+    .expand-icon.expanded {
+      transform: rotate(180deg);
+    }
+
+    /* 메뉴 콘텐츠 */
+    .menu-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .menu-content.expanded {
+      max-height: 1000px;
+    }
+
+    .meal-item {
+      margin: 16px;
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .meal-item:hover {
+      background: #f0f0f0;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .meal-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .meal-type-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .meal-type-indicator.breakfast { background-color: #ff9800; }
+    .meal-type-indicator.lunch { background-color: #4caf50; }
+    .meal-type-indicator.dinner { background-color: #673ab7; }
+
+    .meal-type {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .meal-content {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .meal-item-bullet {
+      display: flex;
+      align-items: center;
+      margin: 2px 0;
+    }
+
+    .meal-item-bullet::before {
+      content: '•';
+      color: #2196f3;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+
+    /* 에러 메시지 */
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px;
+      text-align: center;
+      border-left: 4px solid #f44336;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #757575;
+    }
+
+    .empty-state .material-icons {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* 로딩 상태 */
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 48px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e3f2fd;
+      border-top: 3px solid #2196f3;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 새로고침 버튼 */
+    .refresh-button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin: 16px auto;
+      display: block;
+    }
+
+    .refresh-button:hover {
+      background: #1976d2;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 8px;
+      }
+
+      .app-bar {
+        padding: 12px 16px;
+      }
+
+      .app-bar h1 {
+        font-size: 18px;
+      }
+
+      .app-bar-actions {
+        gap: 8px;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .menu-card-header {
+        padding: 12px;
+      }
+
+      .meal-item {
+        margin: 8px;
+        padding: 12px;
+      }
+    }
+
+    /* 게시판 버튼 */
+    .board-button {
+      background: rgba(33, 150, 243, 0.1);
+      color: #2196f3;
+      border: 1px solid #2196f3;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+      float: right;
+    }
+
+    .board-button:hover {
+      background: #2196f3;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<!-- Flutter AppBar 구현 -->
+<div class="app-bar">
+  <h1>학식 메뉴 앱</h1>
+  <div class="app-bar-actions">
+    <span class="user-info" th:if="${session.CURRENT_USER}" th:text="${session.CURRENT_USER.username} + '님'"></span>
+    <form th:action="@{/logout}" method="post" style="display: inline;">
+      <button type="submit" class="logout-button">로그아웃</button>
+    </form>
+  </div>
+</div>
+
+<div class="main-container">
+  <!-- 에러 메시지 -->
+  <div th:if="${error}" class="error-message">
+    <span th:text="${error}"></span>
+  </div>
+
+  <!-- 메뉴가 없는 경우 -->
+  <div th:if="${#maps.isEmpty(groupedMenus)}" class="empty-state">
+    <span class="material-icons">restaurant_menu</span>
+    <h3>등록된 메뉴가 없습니다</h3>
+    <p>아직 이번 주 메뉴가 등록되지 않았습니다.</p>
+    <button class="refresh-button" onclick="location.reload()">새로고침</button>
+  </div>
+
+  <!-- 메뉴 리스트 -->
+  <div th:each="entry : ${groupedMenus}">
+    <div class="menu-card">
+      <div class="menu-card-header" th:onclick="'toggleMenu(this)'">
+        <div class="menu-date-info">
+          <!-- 요일별 색상 인디케이터 -->
+          <div class="date-indicator" th:classappend="${#temporals.dayOfWeekName(#temporals.create(entry.key))}"></div>
+          <div class="date-text">
+            <div class="date-primary" th:text="${#temporals.format(#temporals.create(entry.key), 'M월 d일 (E)')}"></div>
+            <div class="date-secondary" th:text="${#lists.size(entry.value)} + '개 식사'"></div>
+          </div>
+        </div>
+        <span class="material-icons expand-icon">expand_more</span>
+      </div>
+
+      <div class="menu-content">
+        <!-- 각 식사별 메뉴 -->
+        <div th:each="meal : ${entry.value}" class="meal-item"
+             th:onclick="'goToBoard(\'' + ${meal.date} + '\', \'' + ${meal.mealType} + '\')'">
+          <div class="meal-header">
+            <div class="meal-type-indicator"
+                 th:classappend="${meal.mealType == '아침'} ? 'breakfast' : (${meal.mealType == '점심'} ? 'lunch' : 'dinner')"></div>
+            <span class="meal-type" th:text="${meal.mealType} + ' 메뉴'"></span>
+            <button class="board-button" th:onclick="'event.stopPropagation(); goToBoard(\'' + ${meal.date} + '\', \'' + ${meal.mealType} + '\')'">
+              게시판
+            </button>
+          </div>
+          <div class="meal-content">
+            <!-- 메뉴 항목들을 • 형태로 표시 -->
+            <div th:each="item : ${#strings.listSplit(meal.content, ',')}" class="meal-item-bullet">
+              <span th:text="${#strings.trim(item)}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Flutter 스타일의 ExpansionTile 동작
+  function toggleMenu(headerElement) {
+    const menuCard = headerElement.parentElement;
+    const content = menuCard.querySelector('.menu-content');
+    const expandIcon = headerElement.querySelector('.expand-icon');
+
+    // 토글 상태 확인
+    const isExpanded = content.classList.contains('expanded');
+
+    if (isExpanded) {
+      // 접기
+      content.classList.remove('expanded');
+      headerElement.classList.remove('expanded');
+      expandIcon.classList.remove('expanded');
+    } else {
+      // 펼치기
+      content.classList.add('expanded');
+      headerElement.classList.add('expanded');
+      expandIcon.classList.add('expanded');
+    }
+  }
+
+  // 게시판으로 이동
+  function goToBoard(date, mealType) {
+    window.location.href = `/posts?date=${encodeURIComponent(date)}&mealType=${encodeURIComponent(mealType)}`;
+  }
+
+  // 요일별 색상 설정
+  document.addEventListener('DOMContentLoaded', function() {
+    const dateIndicators = document.querySelectorAll('.date-indicator');
+
+    dateIndicators.forEach(indicator => {
+      const parent = indicator.closest('.menu-card');
+      const dateText = parent.querySelector('.date-primary').textContent;
+
+      // 요일 추출하여 클래스 추가
+      if (dateText.includes('월')) {
+        indicator.classList.add('monday');
+      } else if (dateText.includes('화')) {
+        indicator.classList.add('tuesday');
+      } else if (dateText.includes('수')) {
+        indicator.classList.add('wednesday');
+      } else if (dateText.includes('목')) {
+        indicator.classList.add('thursday');
+      } else if (dateText.includes('금')) {
+        indicator.classList.add('friday');
+      }
+    });
+
+    // 첫 번째 메뉴 카드는 기본적으로 펼쳐놓기
+    const firstCard = document.querySelector('.menu-card');
+    if (firstCard) {
+      const header = firstCard.querySelector('.menu-card-header');
+      toggleMenu(header);
+    }
+  });
+
+  // 새로고침 기능
+  function refreshMenus() {
+    location.reload();
+  }
+
+  // 터치 디바이스에서의 호버 효과 개선
+  if ('ontouchstart' in window) {
+    document.querySelectorAll('.meal-item').forEach(item => {
+      item.addEventListener('touchstart', function() {
+        this.style.transform = 'translateY(-1px)';
+        this.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+      });
+
+      item.addEventListener('touchend', function() {
+        setTimeout(() => {
+          this.style.transform = '';
+          this.style.boxShadow = '';
+        }, 150);
+      });
+    });
+  }
+</script>
+</body>
+</html>

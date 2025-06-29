@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학식 메뉴 앱 - 로그인</title>
+
+    <!-- Material Design Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Flutter AppBar 스타일 */
+        .app-bar {
+            background-color: #2196f3;
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            min-height: 64px;
+        }
+
+        .app-bar h1 {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Flutter Card 스타일 */
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h2 {
+            color: #1976d2;
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #757575;
+            font-size: 14px;
+        }
+
+        /* Flutter TextField 스타일 */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #424242;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .text-field {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: #fafafa;
+        }
+
+        .text-field:focus {
+            outline: none;
+            border-color: #2196f3;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        .text-field.error {
+            border-color: #f44336;
+            background: #fff5f5;
+        }
+
+        /* Flutter ElevatedButton 스타일 */
+        .elevated-button {
+            width: 100%;
+            padding: 16px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+
+        .elevated-button:hover {
+            background: #1976d2;
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .elevated-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+
+        /* Flutter TextButton 스타일 */
+        .text-button {
+            background: none;
+            border: none;
+            color: #2196f3;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .text-button:hover {
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        /* 에러 메시지 스타일 */
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            border-left: 4px solid #f44336;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            border-left: 4px solid #4caf50;
+        }
+
+        /* 링크 섹션 */
+        .link-section {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .link-section p {
+            color: #757575;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 480px) {
+            .login-card {
+                margin: 10px;
+                padding: 24px;
+            }
+
+            .app-bar {
+                padding: 12px 16px;
+            }
+
+            .app-bar h1 {
+                font-size: 18px;
+            }
+        }
+
+        /* 폼 유효성 검사 스타일 */
+        .field-error {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Flutter의 Snackbar 스타일 (알림용) */
+        .snackbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #323232;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 4px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+<!-- Flutter AppBar 구현 -->
+<div class="app-bar">
+    <h1>학식 메뉴 앱</h1>
+</div>
+
+<div class="main-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>로그인</h2>
+            <p>계정에 로그인하여 학식 메뉴를 확인하세요</p>
+        </div>
+
+        <!-- 에러 메시지 -->
+        <div th:if="${error}" class="error-message">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- 성공 메시지 -->
+        <div th:if="${success}" class="success-message">
+            <span th:text="${success}"></span>
+        </div>
+
+        <form th:action="@{/login}" method="post" th:object="${loginRequest}">
+            <div class="form-group">
+                <label for="username">사용자명</label>
+                <input type="text"
+                       id="username"
+                       th:field="*{username}"
+                       class="text-field"
+                       placeholder="사용자명을 입력하세요"
+                       required
+                       autocomplete="username">
+                <div th:if="${#fields.hasErrors('username')}" class="field-error">
+                    <span th:errors="*{username}"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password"
+                       id="password"
+                       th:field="*{password}"
+                       class="text-field"
+                       placeholder="비밀번호를 입력하세요"
+                       required
+                       autocomplete="current-password">
+                <div th:if="${#fields.hasErrors('password')}" class="field-error">
+                    <span th:errors="*{password}"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="elevated-button">
+                로그인
+            </button>
+        </form>
+
+        <div class="link-section">
+            <p>계정이 없으신가요?</p>
+            <a th:href="@{/register}" class="text-button">회원가입</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Flutter 스타일의 폼 상호작용
+    document.addEventListener('DOMContentLoaded', function() {
+        const textFields = document.querySelectorAll('.text-field');
+
+        textFields.forEach(field => {
+            field.addEventListener('focus', function() {
+                this.classList.remove('error');
+            });
+
+            field.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.classList.add('error');
+                }
+            });
+        });
+
+        // 로그인 폼 제출 시 로딩 상태
+        const loginForm = document.querySelector('form');
+        loginForm.addEventListener('submit', function() {
+            const submitButton = this.querySelector('.elevated-button');
+            submitButton.textContent = '로그인 중...';
+            submitButton.classList.add('loading');
+        });
+    });
+</script>
+</body>
+</html>

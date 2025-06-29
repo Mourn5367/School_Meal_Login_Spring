@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학식 메뉴 앱 - 게시판</title>
+
+    <!-- Material Design Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Flutter AppBar 스타일 */
+        .app-bar {
+            background-color: #2196f3;
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 64px;
+        }
+
+        .app-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .app-bar h1 {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* 플로팅 액션 버튼 */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: #2196f3;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            padding-bottom: 100px; /* FAB 공간 확보 */
+        }
+
+        /* 식사 정보 헤더 */
+        .meal-header {
+            background: white;
+            margin: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .meal-info {
+            padding: 16px;
+            background: linear-gradient(45deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
+        }
+
+        .meal-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #2196f3;
+            color: white;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .meal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #212121;
+            margin-bottom: 8px;
+        }
+
+        .meal-content {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .meal-content-item {
+            display: flex;
+            align-items: center;
+            margin: 2px 0;
+        }
+
+        .meal-content-item::before {
+            content: '•';
+            color: #2196f3;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* 게시글 섹션 */
+        .posts-section {
+            margin: 16px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #212121;
+        }
+
+        .post-count {
+            font-size: 14px;
+            color: #757575;
+        }
+
+        /* 게시글 카드 */
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .post-card-content {
+            padding: 16px;
+        }
+
+        .post-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #212121;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-content-preview {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #757575;
+        }
+
+        .post-author {
+            font-weight: 500;
+        }
+
+        .post-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .post-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .post-stat .material-icons {
+            font-size: 16px;
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #757575;
+        }
+
+        .empty-state .material-icons {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #424242;
+        }
+
+        /* 에러 메시지 */
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px;
+            text-align: center;
+            border-left: 4px solid #f44336;
+        }
+
+        /* 새로고침 버튼 */
+        .refresh-button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 16px auto;
+            display: block;
+        }
+
+        .refresh-button:hover {
+            background: #1976d2;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .main-container {
+                padding-bottom: 80px;
+            }
+
+            .app-bar {
+                padding: 12px 16px;
+            }
+
+            .app-bar h1 {
+                font-size: 18px;
+            }
+
+            .meal-header,
+            .posts-section {
+                margin: 8px;
+            }
+
+            .fab {
+                bottom: 16px;
+                right: 16px;
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+
+            .post-card-content {
+                padding: 12px;
+            }
+        }
+
+        /* 식사 타입별 배지 색상 */
+        .meal-type-badge.breakfast { background: #ff9800; }
+        .meal-type-badge.lunch { background: #4caf50; }
+        .meal-type-badge.dinner { background: #673ab7; }
+    </style>
+</head>
+<body>
+<!-- Flutter AppBar 구현 -->
+<div class="app-bar">
+    <div class="app-bar-left">
+        <button class="back-button" onclick="history.back()">
+            <span class="material-icons">arrow_back</span>
+        </button>
+        <h1>게시판</h1>
+    </div>
+</div>
+
+<div class="main-container">
+    <!-- 에러 메시지 -->
+    <div th:if="${error}" class="error-message">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- 식사 정보 헤더 (특정 메뉴의 게시판인 경우) -->
+    <div th:if="${selectedDate and selectedMealType}" class="meal-header">
+        <div class="meal-info">
+            <div class="meal-type-badge"
+                 th:classappend="${selectedMealType == '아침'} ? 'breakfast' : (${selectedMealType == '점심'} ? 'lunch' : 'dinner')"
+                 th:text="${selectedMealType}"></div>
+            <div class="meal-title" th:text="${#temporals.format(#temporals.create(selectedDate), 'M월 d일 (E)')} + ' ' + ${selectedMealType} + ' 메뉴'"></div>
+            <div class="meal-content">
+                <div class="meal-content-item">맛있는 학식을 즐기고 후기를 공유해보세요!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 게시글 섹션 -->
+    <div class="posts-section">
+        <div class="section-header">
+            <span class="section-title">게시글</span>
+            <span class="post-count" th:text="${#lists.size(posts)} + '개의 게시글'"></span>
+        </div>
+
+        <!-- 게시글이 없는 경우 -->
+        <div th:if="${#lists.isEmpty(posts)}" class="empty-state">
+            <span class="material-icons">post_add</span>
+            <h3>아직 게시글이 없습니다</h3>
+            <p>첫 번째 게시글을 작성해보세요!</p>
+        </div>
+
+        <!-- 게시글 목록 -->
+        <div th:each="post : ${posts}" class="post-card" th:onclick="'goToPost(' + ${post.id} + ')'">
+            <div class="post-card-content">
+                <div class="post-title" th:text="${post.title}"></div>
+                <div class="post-content-preview" th:text="${post.content}"></div>
+                <div class="post-meta">
+                    <span class="post-author" th:text="${post.author}"></span>
+                    <div class="post-stats">
+                        <div class="post-stat">
+                            <span class="material-icons">favorite</span>
+                            <span th:text="${post.likeCount ?: 0}"></span>
+                        </div>
+                        <div class="post-stat">
+                            <span class="material-icons">comment</span>
+                            <span th:text="${post.commentCount ?: 0}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 플로팅 액션 버튼 (게시글 작성) -->
+<button class="fab" th:onclick="'createPost(\'' + ${selectedDate} + '\', \'' + ${selectedMealType} + '\')'">
+    <span class="material-icons">add</span>
+</button>
+
+<script>
+    // 게시글 상세로 이동
+    function goToPost(postId) {
+        window.location.href = `/posts/${postId}/view`;
+    }
+
+    // 게시글 작성 페이지로 이동
+    function createPost(date, mealType) {
+        let url = '/posts/create';
+        const params = new URLSearchParams();
+
+        if (date && mealType) {
+            params.append('date', date);
+            params.append('mealType', mealType);
+        }
+
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+
+        window.location.href = url;
+    }
+
+    // 새로고침 기능
+    function refreshPosts() {
+        location.reload();
+    }
+
+    // 터치 디바이스에서의 호버 효과 개선
+    if ('ontouchstart' in window) {
+        document.querySelectorAll('.post-card').forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+            });
+
+            card.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                }, 150);
+            });
+        });
+    }
+
+    // FAB 애니메이션
+    document.addEventListener('DOMContentLoaded', function() {
+        const fab = document.querySelector('.fab');
+
+        // 스크롤 시 FAB 숨기기/보이기
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > lastScrollTop) {
+                // 아래로 스크롤
+                fab.style.transform = 'translateY(100px)';
+            } else {
+                // 위로 스크롤
+                fab.style.transform = 'translateY(0)';
+            }
+
+            lastScrollTop = scrollTop;
+        });
+    });
+</script>
+</body>
+</html>

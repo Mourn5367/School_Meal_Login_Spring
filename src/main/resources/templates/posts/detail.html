@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학식 메뉴 앱 - 게시글</title>
+
+    <!-- Material Design Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Flutter AppBar 스타일 */
+        .app-bar {
+            background-color: #2196f3;
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 64px;
+        }
+
+        .app-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .app-bar h1 {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 16px;
+        }
+
+        /* 게시글 카드 */
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .post-header {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .post-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #212121;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #757575;
+        }
+
+        .post-author {
+            font-weight: 500;
+            color: #424242;
+        }
+
+        .post-date {
+            color: #757575;
+        }
+
+        .post-content {
+            padding: 20px;
+            color: #424242;
+            font-size: 16px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .post-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        /* 좋아요/공유 버튼 */
+        .post-actions {
+            padding: 12px 20px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .action-button {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: #757575;
+        }
+
+        .action-button:hover {
+            background: #f5f5f5;
+        }
+
+        .action-button.liked {
+            color: #f44336;
+        }
+
+        .action-button .material-icons {
+            font-size: 20px;
+        }
+
+        /* 댓글 섹션 */
+        .comments-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .comments-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #424242;
+        }
+
+        .comment-form {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .comment-input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 14px;
+            resize: none;
+            min-height: 40px;
+            max-height: 120px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+
+        .comment-submit {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comment-submit:hover {
+            background: #1976d2;
+        }
+
+        .comment-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 댓글 목록 */
+        .comments-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f8f8f8;
+        }
+
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .comment-author {
+            font-weight: 500;
+            color: #424242;
+            font-size: 14px;
+        }
+
+        .comment-date {
+            font-size: 12px;
+            color: #757575;
+        }
+
+        .comment-content {
+            color: #424242;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .comment-like {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #757575;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .comment-like:hover {
+            background: #f5f5f5;
+        }
+
+        .comment-like.liked {
+            color: #f44336;
+        }
+
+        .comment-like .material-icons {
+            font-size: 16px;
+        }
+
+        /* 빈 상태 */
+        .empty-comments {
+            padding: 48px 20px;
+            text-align: center;
+            color: #757575;
+        }
+
+        .empty-comments .material-icons {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* 에러 메시지 */
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            border-left: 4px solid #f44336;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 8px;
+            }
+
+            .app-bar {
+                padding: 12px 16px;
+            }
+
+            .app-bar h1 {
+                font-size: 18px;
+            }
+
+            .post-header,
+            .post-content,
+            .post-actions {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .comment-form,
+            .comment-item {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .post-title {
+                font-size: 18px;
+            }
+        }
+
+        /* 로딩 상태 */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<!-- Flutter AppBar 구현 -->
+<div class="app-bar">
+    <div class="app-bar-left">
+        <button class="back-button" onclick="history.back()">
+            <span class="material-icons">arrow_back</span>
+        </button>
+        <h1>게시글</h1>
+    </div>
+</div>
+
+<div class="main-container">
+    <!-- 에러 메시지 -->
+    <div th:if="${error}" class="error-message">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- 게시글 카드 -->
+    <div th:if="${post}" class="post-card">
+        <div class="post-header">
+            <h1 class="post-title" th:text="${post.title}"></h1>
+            <div class="post-meta">
+                <span class="post-author" th:text="${post.author}"></span>
+                <span class="post-date" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+        </div>
+
+        <div class="post-content" th:text="${post.content}"></div>
+
+        <!-- 이미지가 있는 경우 -->
+        <div th:if="${post.imageUrl}" class="post-content">
+            <img th:src="${post.imageUrl}" alt="게시글 이미지" class="post-image">
+        </div>
+
+        <div class="post-actions">
+            <div class="action-buttons">
+                <button class="action-button" id="likeButton" onclick="toggleLike()">
+                    <span class="material-icons">favorite_border</span>
+                    <span id="likeCount" th:text="${post.likeCount ?: 0}"></span>
+                </button>
+                <button class="action-button">
+                    <span class="material-icons">comment</span>
+                    <span th:text="${#lists.size(comments)} + '개'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 댓글 섹션 -->
+    <div class="comments-section">
+        <div class="comments-header">
+            댓글 <span th:text="${#lists.size(comments)}"></span>개
+        </div>
+
+        <!-- 댓글 작성 폼 -->
+        <div class="comment-form" th:if="${session.CURRENT_USER}">
+            <form th:action="@{'/posts/' + ${post.id} + '/comments'}" method="post" id="commentForm">
+                <div class="comment-input-container">
+                        <textarea name="content"
+                                  class="comment-input"
+                                  placeholder="댓글을 입력하세요..."
+                                  required></textarea>
+                    <input type="hidden" name="author" th:value="${session.CURRENT_USER.username}">
+                    <button type="submit" class="comment-submit">
+                        <span class="material-icons">send</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 로그인 필요 메시지 -->
+        <div class="comment-form" th:unless="${session.CURRENT_USER}">
+            <div style="text-align: center; padding: 16px; color: #757575;">
+                <a th:href="@{/login}" style="color: #2196f3; text-decoration: none;">로그인</a>하시면 댓글을 작성할 수 있습니다.
+            </div>
+        </div>
+
+        <!-- 댓글 목록 -->
+        <div class="comments-list" th:if="${!#lists.isEmpty(comments)}">
+            <div th:each="comment : ${comments}" class="comment-item">
+                <div class="comment-header">
+                    <span class="comment-author" th:text="${comment.author}"></span>
+                    <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'MM-dd HH:mm')}"></span>
+                </div>
+                <div class="comment-content" th:text="${comment.content}"></div>
+                <div class="comment-actions">
+                    <button class="comment-like" th:onclick="'toggleCommentLike(' + ${comment.id} + ')'">
+                        <span class="material-icons">favorite_border</span>
+                        <span th:text="${comment.likeCount ?: 0}"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 댓글이 없는 경우 -->
+        <div class="empty-comments" th:if="${#lists.isEmpty(comments)}">
+            <span class="material-icons">comment</span>
+            <p>아직 댓글이 없습니다</p>
+            <p>첫 번째 댓글을 남겨보세요!</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 좋아요 토글
+    function toggleLike() {
+        const button = document.getElementById('likeButton');
+        const countSpan = document.getElementById('likeCount');
+        const icon = button.querySelector('.material-icons');
+
+        // TODO: 실제 API 호출
+        // 임시로 UI만 업데이트
+        const isLiked = button.classList.contains('liked');
+        let count = parseInt(countSpan.textContent);
+
+        if (isLiked) {
+            button.classList.remove('liked');
+            icon.textContent = 'favorite_border';
+            count--;
+        } else {
+            button.classList.add('liked');
+            icon.textContent = 'favorite';
+            count++;
+        }
+
+        countSpan.textContent = count;
+    }
+
+    // 댓글 좋아요 토글
+    function toggleCommentLike(commentId) {
+        const button = event.target.closest('.comment-like');
+        const countSpan = button.querySelector('span:last-child');
+        const icon = button.querySelector('.material-icons');
+
+        // TODO: 실제 API 호출
+        // 임시로 UI만 업데이트
+        const isLiked = button.classList.contains('liked');
+        let count = parseInt(countSpan.textContent);
+
+        if (isLiked) {
+            button.classList.remove('liked');
+            icon.textContent = 'favorite_border';
+            count--;
+        } else {
+            button.classList.add('liked');
+            icon.textContent = 'favorite';
+            count++;
+        }
+
+        countSpan.textContent = count;
+    }
+
+    // 댓글 입력 자동 크기 조절
+    document.addEventListener('DOMContentLoaded', function() {
+        const commentInput = document.querySelector('.comment-input');
+
+        if (commentInput) {
+            commentInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+
+        // 댓글 폼 제출 처리
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function() {
+                const submitButton = this.querySelector('.comment-submit');
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="material-icons">hourglass_empty</span>';
+            });
+        }
+    });
+
+    // 스크롤 시 헤더 그림자 효과
+    window.addEventListener('scroll', function() {
+        const appBar = document.querySelector('.app-bar');
+        if (window.scrollY > 0) {
+            appBar.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+        } else {
+            appBar.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        }
+    });
+</script>
+</body>
+</html>
